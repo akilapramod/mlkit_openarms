@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'camera_view.dart';
 import 'pose_painter.dart';
+import 'pose_analyzer.dart';
 
 
 class CameraPage extends StatefulWidget {
@@ -17,6 +18,7 @@ class _CameraPageState extends State<CameraPage> {
   bool _canProcess = true;
   bool _isBusy = false;
   CustomPaint? _customPaint;
+  Map<String, dynamic> _poseAnalysisResult = {"result": "undetermined", "confidence": 0.0};
 
   @override
   void dispose() {
@@ -42,10 +44,12 @@ class _CameraPageState extends State<CameraPage> {
     final poses = await _poseDetector.processImage(inputImage);
     if (poses.isNotEmpty) {
       final pose = poses.first;
+      // Analyze the pose.
+      _poseAnalysisResult = {"result": areArmsOpen(pose) ? "open arms" : "not open arms", "confidence" : 0.0};
       // Print pose landmarks to console
-      pose.landmarks.forEach((key, point) {
-        print('${key.name}: (${point.x}, ${point.y})');
-      });
+      // pose.landmarks.forEach((key, point) {
+      //   print('${key.name}: (${point.x}, ${point.y})');
+      // });
     }
 
     if (inputImage.metadata?.size != null &&
@@ -54,6 +58,7 @@ class _CameraPageState extends State<CameraPage> {
         poses,
         inputImage.metadata!.size,
         inputImage.metadata!.rotation,
+        _poseAnalysisResult, // Pass the result to the painter.
       );
       _customPaint = CustomPaint(painter: painter);
     } else {

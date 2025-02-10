@@ -6,8 +6,9 @@ class PosePainter extends CustomPainter {
   final List<Pose> poses;
   final Size absoluteImageSize;
   final InputImageRotation rotation;
+  final Map<String, dynamic> analysisResult;
 
-  PosePainter(this.poses, this.absoluteImageSize, this.rotation);
+  PosePainter(this.poses, this.absoluteImageSize, this.rotation, this.analysisResult);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -54,11 +55,29 @@ class PosePainter extends CustomPainter {
       drawLine(PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow);
       // Add more lines as needed
     }
+
+    // Display the analysis result.
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '${analysisResult["result"]} (${(analysisResult["confidence"] * 100).toStringAsFixed(0)}%)',
+        style: TextStyle(
+          color: Colors.green,
+          fontSize: 24,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
+    textPainter.paint(canvas, Offset(10, 10)); // Adjust position as needed.
   }
+
 
   @override
   bool shouldRepaint(covariant PosePainter oldDelegate) {
     return oldDelegate.absoluteImageSize != absoluteImageSize ||
-        oldDelegate.poses != poses;
+        oldDelegate.poses != poses || oldDelegate.analysisResult != analysisResult;
   }
 }
